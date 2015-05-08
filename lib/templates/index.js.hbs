@@ -1,0 +1,21 @@
+(function (root, client) {
+  if (typeof define === 'function' && define.amd) {
+    define({{{dependencies this 'amd'}}}, client)
+  } else if (typeof exports === 'object') {
+    module.exports = client({{{dependencies this 'node'}}})
+  } else {
+    root.{{pascalCase title}} = client({{{dependencies this 'browser'}}})
+  }
+})(this, function ({{{dependencies this false}}}) {
+{{#indent 2}}
+{{>utils}}
+
+{{>resources}}
+
+{{>client}}
+
+{{>auth}}
+
+return Client
+{{/indent}}
+})

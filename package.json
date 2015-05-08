@@ -1,0 +1,67 @@
+{
+  "name": "raml-javascript-generator",
+  "version": "0.0.0",
+  "description": "Generate a JavaScript API client from RAML",
+  "main": "raml-javascript-generator.js",
+  "files": [
+    "raml-javascript-generator.js",
+    "bin/",
+    "templates/",
+    "LICENSE"
+  ],
+  "bin": {
+    "raml-javascript-generator": "bin/raml-javascript-generator.js"
+  },
+  "scripts": {
+    "lint": "standard",
+    "test": "npm run lint && gulp test"
+  },
+  "standard": {
+    "ignore": [
+      "coverage/**",
+      "node_modules/**",
+      "bower_components/**"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mulesoft-labs/raml-javascript-generator.git"
+  },
+  "keywords": [
+    "raml",
+    "client",
+    "api",
+    "javascript",
+    "interface"
+  ],
+  "author": "MuleSoft, Inc.",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/mulesoft-labs/raml-javascript-generator/issues"
+  },
+  "homepage": "https://github.com/mulesoft-labs/raml-javascript-generator",
+  "devDependencies": {
+    "camel-case": "^1.1.1",
+    "chai": "^2.0.0",
+    "es6-promise": "^2.1.1",
+    "express": "^4.12.3",
+    "gulp": "^3.8.11",
+    "is-travis": "^1.0.0",
+    "istanbul": "^0.3.5",
+    "karma": "^0.12.31",
+    "karma-chrome-launcher": "^0.1.8",
+    "karma-firefox-launcher": "^0.1.4",
+    "karma-mocha": "^0.1.10",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "karma-sinon-chai": "^0.3.0",
+    "methods": "^1.1.1",
+    "mocha": "^2.1.0",
+    "nock": "^1.9.0",
+    "pre-commit": "^1.0.6",
+    "standard": "^2.1.1"
+  },
+  "dependencies": {
+    "javascript-stringify": "^1.0.1",
+    "raml-generator": "^0.1.3"
+  }
+}
