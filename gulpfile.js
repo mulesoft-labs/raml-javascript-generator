@@ -7,7 +7,7 @@ var server = require('./test/support/server')
 
 var MOCHA_BIN_PATH = join(__dirname, 'node_modules/mocha/bin/_mocha')
 var CLIENT_OUT_DIR = join(__dirname, 'test/.tmp')
-var RAML_CLIENT_SCRIPT = join(__dirname, 'bin/index.js')
+var RAML_CLIENT_SCRIPT = join(__dirname, 'bin/raml-javascript-generator.js')
 
 gulp.task('server', function (done) {
   var app = server.listen(4444, done)
