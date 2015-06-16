@@ -2,23 +2,19 @@ var join = require('path').join
 var readFileSync = require('fs').readFileSync
 var generator = require('raml-generator')
 
-function read (path) {
-  return readFileSync(join(__dirname, 'lib', path), 'utf8')
-}
-
 module.exports = generator({
   templates: {
-    '.gitignore': read('templates/.gitignore.hbs'),
-    'index.js': read('templates/index.js.hbs'),
-    'README.md': read('templates/README.md.hbs'),
-    'INSTALL.md': read('templates/INSTALL.md.hbs'),
-    'package.json': read('templates/package.json.hbs')
+    '.gitignore': readFileSync(join(__dirname, 'lib/templates/.gitignore.hbs'), 'utf8'),
+    'index.js': readFileSync(join(__dirname, 'lib/templates/index.js.hbs'), 'utf8'),
+    'README.md': readFileSync(join(__dirname, 'lib/templates/README.md.hbs'), 'utf8'),
+    'INSTALL.md': readFileSync(join(__dirname, 'lib/templates/INSTALL.md.hbs'), 'utf8'),
+    'package.json': readFileSync(join(__dirname, 'lib/templates/package.json.hbs'), 'utf8')
   },
   partials: {
-    auth: read('partials/auth.js.hbs'),
-    utils: read('partials/utils.js.hbs'),
-    client: read('partials/client.js.hbs'),
-    resources: read('partials/resources.js.hbs')
+    auth: readFileSync(join(__dirname, 'lib/partials/auth.js.hbs'), 'utf8'),
+    utils: readFileSync(join(__dirname, 'lib/partials/utils.js.hbs'), 'utf8'),
+    client: readFileSync(join(__dirname, 'lib/partials/client.js.hbs'), 'utf8'),
+    resources: readFileSync(join(__dirname, 'lib/partials/resources.js.hbs'), 'utf8')
   },
   helpers: {
     stringify: require('javascript-stringify'),
