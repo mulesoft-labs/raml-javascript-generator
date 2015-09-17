@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/mulesoft/raml-javascript-generator",
   "dependencies": {
-    {{#if security.[OAuth 2.0]}}"client-oauth2": "^0.2.4",
-    {{/if}}"popsicle": "^0.5.6"
+    {{#if (contains (pluck security "type") "OAuth 2.0")}}"client-oauth2": "^1.0.0",
+    {{/if}}"popsicle": "^1.1.0"
   }
 }

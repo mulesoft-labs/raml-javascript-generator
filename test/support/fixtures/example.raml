@@ -14,7 +14,7 @@ baseUriParameters:
     type: integer
     minimum: 1024
     maximum: 65535
-    default: 4444
+    default: 4567
 
 securitySchemes:
   - oauth_2_0:
@@ -34,8 +34,8 @@ securitySchemes:
           401:
             description: Unauthorized
       settings:
-        authorizationUri: https://localhost:4444/auth/oauth2/authorize
-        accessTokenUri: https://localhost:4444/auth/oauth2/access_token
+        authorizationUri: https://localhost:4567/auth/oauth2/authorize
+        accessTokenUri: https://localhost:4567/auth/oauth2/access_token
         authorizationGrants: [ code, token, owner, credentials ]
         scopes: [ user ]
 

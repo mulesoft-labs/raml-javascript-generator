@@ -4,7 +4,7 @@ var join = require('path').join
 var express = require('express')
 
 var app = module.exports = express()
-var port = process.env.PORT || 4444
+var port = process.env.PORT || 4567
 
 /**
  * Respond with "Success".

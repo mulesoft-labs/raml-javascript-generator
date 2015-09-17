@@ -31,7 +31,7 @@ var client = new {{pascalCase title}}();
 </script>
 ```
 
-{{#if security.[OAuth 2.0]}}
+{{#if (contains (pluck security "type") "OAuth 2.0")}}
 ### Authentication
 
 #### OAuth 2.0
@@ -39,38 +39,38 @@ var client = new {{pascalCase title}}();
 This API supports authentication with [OAuth 2.0](https://github.com/mulesoft/js-client-oauth2). Initialize the `OAuth2` instance with the application client id, client secret and a redirect uri to authenticate with users.
 
 ```js
-var auth = new {{pascalCase title}}.OAuth2({
+var auth = new {{pascalCase title}}.security.<method>({
   clientId:     '123',
   clientSecret: 'abc',
   redirectUri:  'http://example.com/auth/callback'
 });
+
+// Available methods for OAuth 2.0:{{#each security}}{{#if (equal this.type "OAuth 2.0")}}
+// {{camelCase @key}}
+{{/if}}{{/each}}
 ```
 
 **All `getToken()` calls are asynchronous and return promise objects which resolve to an access token instance.**
 
-{{#if (contains security.[OAuth 2.0].settings.authorizationGrants 'code')}}
 ##### [Authorization Code Grant](https://github.com/mulesoft/js-client-oauth2#authorization-code-grant)
 
 1. Redirect user to `auth.code.getUri()`.
 2. Parse response uri and get an access token instance using `auth.code.getToken(uri)`.
 
-{{/if}}{{#if (contains security.[OAuth 2.0].settings.authorizationGrants 'token')}}
 ##### [Implicit Grant](https://github.com/mulesoft/js-client-oauth2#implicit-grant)
 
 1. Redirect user to `auth.token.getUri()` in a browser.
 2. Parse response uri and get an access token instance using `auth.token.getToken(uri)`.
 
-{{/if}}{{#if (contains security.[OAuth 2.0].settings.authorizationGrants 'owner')}}
 ##### [Resource Owner Password Credentials Grant](https://github.com/mulesoft/js-client-oauth2#resource-owner-password-credentials-grant)
 
 1. Make a direct request for the access token on behalf of the user using `auth.owner.getToken(username, password)`.
 
-{{/if}}{{#if (contains security.[OAuth 2.0].settings.authorizationGrants 'credentials')}}
 ##### [Client Credentials Grant](https://github.com/mulesoft/js-client-oauth2#client-credentials-grant)
 
 1. Get the access token for the application by using `auth.credentials.getToken()`.
 
-{{/if}}##### Access Tokens
+##### Access Tokens
 
 Access token instances can be manually re-created. This is critical for access token reuse, such as saving credentials to a database for reusing later in the codebase.
 

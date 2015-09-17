@@ -1,14 +1,9 @@
-{{#if security.[OAuth 2.0]}}
-/**
- * @param {Object} options
- */
-function OAuth2 (options) {
-  ClientOAuth2.call(this, extend({{{stringify security.[OAuth 2.0].settings}}}, options))
+Client.Security = {}
+
+{{#each security}}
+{{#if (equal this.type "OAuth 2.0")}}
+Client.Security.{{camelCase @key}} = function OAuth2 (options) {
+  return new ClientOAuth2(extend({{{stringify this.settings}}}, options))
 }
-
-OAuth2.prototype = Object.create(ClientOAuth2.prototype)
-OAuth2.prototype.constructor = OAuth2
-OAuth2.prototype.request = popsicle
-
-Client.OAuth2 = OAuth2
 {{/if}}
+{{/each}}
