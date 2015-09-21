@@ -21,7 +21,7 @@ test('oauth2', function (t) {
 
   t.test('user object should sign requests', function (t) {
     var client = new ExampleApi({
-      user: oauth2.createToken('abc')
+      user: oauth2.createToken('abc', null, 'Bearer')
     })
 
     return client.resources.bounce.headers.get()

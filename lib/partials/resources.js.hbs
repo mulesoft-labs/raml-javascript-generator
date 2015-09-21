@@ -3,7 +3,6 @@ function handleRequest (client, path, method, body, options) {
 
   var baseUri = template(options.baseUri, options.baseUriParameters)
   var hasBody = method !== 'GET' && method !== 'HEAD'
-  var reqOpts = {}
 
   var reqBody = hasBody && body != null ? body : options.body
   var reqQuery = !hasBody && body != null ? body : options.query
@@ -17,7 +16,7 @@ function handleRequest (client, path, method, body, options) {
   }
 
   if (options.user && typeof options.user.sign === 'function') {
-    options.user.sign(reqOpts)
+    reqOpts = options.user.sign(reqOpts)
   }
 
   return client.request(reqOpts)
