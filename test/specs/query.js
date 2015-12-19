@@ -14,12 +14,12 @@ test('query string', function (t) {
 
     t.test('body argument (#get)', function (t) {
       t.test('should pass query string as an object', function (t) {
-        return client.resources.bounce.url.get({ key: 'string' })
+        return client.bounce.url.get({ key: 'string' })
           .then(validateResponse(t))
       })
 
       t.test('should pass query string as a string', function (t) {
-        return client.resources.bounce.url.get('key=string')
+        return client.bounce.url.get('key=string')
           .then(validateResponse(t))
       })
     })
@@ -28,14 +28,14 @@ test('query string', function (t) {
       t.test('should pass query string as an object', function (t) {
         var opts = { query: { key: 'string' } }
 
-        return client.resources.bounce.url.post(null, opts)
+        return client.bounce.url.post(null, opts)
           .then(validateResponse(t))
       })
 
       t.test('should pass query string as a string', function (t) {
         var opts = { query: 'key=string' }
 
-        return client.resources.bounce.url.post(null, opts)
+        return client.bounce.url.post(null, opts)
           .then(validateResponse(t))
       })
     })
@@ -44,7 +44,7 @@ test('query string', function (t) {
   t.test('types', function (t) {
     t.test('array', function (t) {
       t.test('should stringify with multiple keys', function (t) {
-        return client.resources.bounce.url.get({
+        return client.bounce.url.get({
           key: [1, 2, 3]
         })
           .then(function (response) {

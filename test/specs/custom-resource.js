@@ -7,14 +7,12 @@ test('custom resource', function (t) {
   var client = new ExampleApi()
 
   methods.forEach(function (verb) {
-    var method = camelCase(verb)
-
     if (verb === 'connect' || verb === 'head') {
       return
     }
 
-    t.test('#' + method + ' should work', function (t) {
-      return client.resource('/status/{id}', { id: 200 })[method]()
+    t.test('method "' + verb + '" should work', function (t) {
+      return client(verb, '/status/{id}', { uriParameters: { id: 200 } })
         .then(function validateResponse (response) {
           t.equal(response.body, 'Success')
           t.equal(response.status, 200)

@@ -24,7 +24,7 @@ test('oauth2', function (t) {
       user: oauth2.createToken('abc', null, 'Bearer')
     })
 
-    return client.resources.bounce.headers.get()
+    return client.bounce.headers.get()
       .then(function (response) {
         t.equal(response.status, 200)
         t.equal(response.body.authorization, 'Bearer abc')

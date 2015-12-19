@@ -5,7 +5,7 @@ test('response headers', function (t) {
   var client = new ExampleApi()
 
   t.test('should return in a lower-cased object', function (t) {
-    return client.resources.get()
+    return client.get()
       .then(function (res) {
         t.equal(res.body, 'Success')
         t.equal(res.status, 200)

@@ -14,7 +14,7 @@ test('flow control', function (t) {
   t.test('promise methods', function (t) {
     METHODS.forEach(function (method) {
       t.test('#' + method + ' #then should resolve', function (t) {
-        return client.resources.hello[method]()
+        return client.hello[method]()
           .then(function (response) {
             t.equal(response.body, 'Hello World!')
             t.equal(response.status, 200)
@@ -26,7 +26,7 @@ test('flow control', function (t) {
 
   t.test('reuse request', function (t) {
     t.test('should reuse the promise', function (t) {
-      var request = client.resources.hello.get()
+      var request = client.hello.get()
 
       return request.then(function (response) {
         return request.then(function (response2) {
@@ -36,7 +36,7 @@ test('flow control', function (t) {
     })
 
     t.test('should reuse for exec', function (t) {
-      var request = client.resources.hello.get()
+      var request = client.hello.get()
 
       request.then(function (response) {
         return request.exec(function (err, response2) {
@@ -51,8 +51,8 @@ test('flow control', function (t) {
   t.test('Promise#all should resolve', function (t) {
     return Promise
       .all([
-        client.resources.hello.get(),
-        client.resources.hello.post()
+        client.hello.get(),
+        client.hello.post()
       ])
       .then(function (responses) {
         var get = responses[0]
@@ -69,7 +69,7 @@ test('flow control', function (t) {
   })
 
   t.test('#exec should callback', function (t) {
-    client.resources.hello.get()
+    client.hello.get()
       .exec(function (err, response) {
         t.equal(response.body, 'Hello World!')
         t.equal(response.status, 200)

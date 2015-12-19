@@ -7,7 +7,7 @@ test('response body', function (t) {
   t.test('response content types', function (t) {
     t.test('text', function (t) {
       t.test('should respond as text when unknown', function (t) {
-        return client.resources.responses.text.get()
+        return client.responses.text.get()
           .then(function (response) {
             t.equal(response.status, 200)
             t.equal(response.body, 'text')
@@ -17,7 +17,7 @@ test('response body', function (t) {
 
     t.test('json', function (t) {
       t.test('should parse as JSON when specified', function (t) {
-        return client.resources.responses.json.get()
+        return client.responses.json.get()
           .then(function (response) {
             t.equal(response.status, 200)
             t.deepEqual(response.body, { json: true })
@@ -28,7 +28,7 @@ test('response body', function (t) {
     t.test('url encoded', function (t) {
       t.test('simple query string', function (t) {
         t.test('should parse', function (t) {
-          return client.resources.responses.urlEncoded.basic.get()
+          return client.responses.urlEncoded.basic.get()
             .then(function (response) {
               t.equal(response.status, 200)
               t.deepEqual(response.body, { key: 'value' })
@@ -38,7 +38,7 @@ test('response body', function (t) {
 
       t.test('duplicate keys', function (t) {
         t.test('should put duplicate keys into an array', function (t) {
-          return client.resources.responses.urlEncoded.duplicate.post()
+          return client.responses.urlEncoded.duplicate.post()
             .then(function (response) {
               t.equal(response.status, 200)
               t.deepEqual(response.body, { key: ['1', '2', '3'] })
@@ -48,7 +48,7 @@ test('response body', function (t) {
 
       t.test('encoded values', function (t) {
         t.test('should be uri decoded', function (t) {
-          return client.resources.responses.urlEncoded.escaped.put()
+          return client.responses.urlEncoded.escaped.put()
             .then(function (response) {
               t.equal(response.status, 200)
               t.deepEqual(response.body, { key: 'Hello, world!' })
