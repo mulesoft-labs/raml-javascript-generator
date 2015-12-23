@@ -19,7 +19,7 @@ function handleRequest (client, path, method, body, options) {
     reqOpts = options.user.sign(reqOpts)
   }
 
-  return client.request(reqOpts)
+  return client.request(extend(options, reqOpts))
 }
 
 {{#each allResources}}
