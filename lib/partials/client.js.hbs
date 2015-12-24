@@ -1,7 +1,8 @@
 function Client (options) {
   this.options = extend({
     baseUri: {{{stringify baseUri}}},
-    baseUriParameters: {{{stringify (object (keys baseUriParameters) (pluck baseUriParameters 'default'))}}}
+    baseUriParameters: {{{stringify (object (keys baseUriParameters) (pluck baseUriParameters 'default'))}}},
+    options: {}
   }, options)
 
   this.resources = new {{pascalCase resources.id}}('', this)
@@ -16,3 +17,28 @@ Client.prototype.resource = function (route, parameters) {
 Client.prototype.request = popsicle
 Client.prototype.form = Client.form = popsicle.form
 Client.prototype.version  = {{{stringify version}}}
+
+Client.prototype._request = function (path, method, body, options) {
+  options = extend({}, this.options, options)
+
+  var baseUri = template(options.baseUri, options.baseUriParameters)
+  var hasBody = method !== 'GET' && method !== 'HEAD'
+
+  var reqBody = hasBody && body != null ? body : options.body
+  var reqQuery = !hasBody && body != null ? body : options.query
+
+  var reqOpts = {
+    url: baseUri.replace(/\/$/, '') + path,
+    method: method,
+    headers: extend({}, options.headers),
+    body: reqBody,
+    query: typeof reqQuery === 'object' ? extend({}, reqQuery) : reqQuery,
+    options: extend({}, this.options.options, options.options)
+  }
+
+  if (options.user && typeof options.user.sign === 'function') {
+    reqOpts = options.user.sign(reqOpts)
+  }
+
+  return this.request(reqOpts)
+}
