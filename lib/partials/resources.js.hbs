@@ -1,27 +1,3 @@
-function handleRequest (client, path, method, body, options) {
-  options = extend({}, client.options, options)
-
-  var baseUri = template(options.baseUri, options.baseUriParameters)
-  var hasBody = method !== 'GET' && method !== 'HEAD'
-
-  var reqBody = hasBody && body != null ? body : options.body
-  var reqQuery = !hasBody && body != null ? body : options.query
-
-  var reqOpts = {
-    url: baseUri.replace(/\/$/, '') + path,
-    method: method,
-    headers: extend({}, options.headers),
-    body: reqBody,
-    query: typeof reqQuery === 'object' ? extend({}, reqQuery) : reqQuery
-  }
-
-  if (options.user && typeof options.user.sign === 'function') {
-    reqOpts = options.user.sign(reqOpts)
-  }
-
-  return client.request(reqOpts)
-}
-
 {{#each allResources}}
 function {{pascalCase id}} (uri, client) {
   this._uri = uri
@@ -51,7 +27,7 @@ function {{pascalCase id}} (uri, client) {
   options.headers = extend({{{stringify (object (keys headers) (pluck headers 'default'))}}}, options.headers)
 
   {{/if}}
-  return handleRequest(this._client, this._uri, {{{stringify (upperCase method)}}}, body, options)
+  return this._client._request(this._uri, {{{stringify (upperCase method)}}}, body, options)
 }
 {{/each}}
 {{/each}}
@@ -63,6 +39,6 @@ function CustomResource (uri, client) {
 
 {{#each supportedMethods}}
 CustomResource.prototype.{{camelCase this}} = function (body, options) {
-  return handleRequest(this._client, this._uri, {{{stringify (upperCase this)}}}, body, options)
+  return this._client._request(this._uri, {{{stringify (upperCase this)}}}, body, options)
 }
 {{/each}}
