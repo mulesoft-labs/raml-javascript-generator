@@ -6,7 +6,7 @@ test('request headers', function (t) {
 
   t.test('custom headers', function (t) {
     t.test('should pass custom headers with the request', function (t) {
-      return client.resources.bounce.headers.get(null, {
+      return client.bounce.headers.get(null, {
         headers: { 'X-Custom-Header': 'Custom Header' }
       })
         .then(function (response) {
@@ -19,7 +19,7 @@ test('request headers', function (t) {
   t.test('default headers', function (t) {
     t.test('use defaults', function (t) {
       t.test('should use default headers from definition', function (t) {
-        return client.resources.defaults.headers.get()
+        return client.defaults.headers.get()
           .then(function (response) {
             t.equal(response.status, 200)
             t.equal(response.body['x-default-header'], 'Hello World!')
@@ -29,7 +29,7 @@ test('request headers', function (t) {
 
     t.test('override defaults', function (t) {
       t.test('should override default headers', function (t) {
-        return client.resources.defaults.headers.get(null, {
+        return client.defaults.headers.get(null, {
           headers: { 'x-default-header': 'Overridden' }
         })
           .then(function (response) {

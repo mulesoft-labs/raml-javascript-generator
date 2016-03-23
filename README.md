@@ -17,10 +17,15 @@ npm install raml-javascript-generator -g
 
 This module depends on [raml-generator](https://github.com/mulesoft-labs/raml-generator) and can be used globally or locally with JavaScript.
 
+* Chained DSL generation
+* `README.md` output
+* Support for `client.methodName` and `client.displayName` annotations
+* Emits OAuth 2.0 client wrappers
+
 ### Global
 
 ```
-raml-javascript-generator api.raml -o api-client-js
+raml-javascript-generator api.raml -o js-client
 ```
 
 ### Locally
@@ -28,7 +33,7 @@ raml-javascript-generator api.raml -o api-client-js
 ```js
 var jsGenerator = require('raml-javascript-generator')
 
-var output = jsGenerator(/* raml, data */)
+var output = jsGenerator(/* api, data */)
 ```
 
 ## License

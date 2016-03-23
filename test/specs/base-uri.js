@@ -46,7 +46,7 @@ test('base uri', function (t) {
     })
 
     t.test('should be able to manually set the base uri', function (t) {
-      return client.resources.hello.get()
+      return client.hello.get()
         .then(validateResponse(t))
     })
   })
@@ -60,7 +60,7 @@ test('base uri', function (t) {
     })
 
     t.test('should be able to manually set the base uri', function (t) {
-      return client.resources.hello.get()
+      return client.hello.get()
         .then(validateResponse(t))
     })
   })

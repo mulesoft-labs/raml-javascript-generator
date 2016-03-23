@@ -11,13 +11,13 @@ test('resource chain', function (t) {
     }
   }
 
-  t.test('root resource should work', function (t) {
-    return client.resources.get().then(validateResponse(t))
+  t.test('root resource work', function (t) {
+    return client.get().then(validateResponse(t))
   })
 
   t.test('uri parameter', function (t) {
-    t.test('should dynamically generate the resource chain', function (t) {
-      return client.resources.bounce.parameter.variable(123).get()
+    t.test('dynamically generate the resource chain', function (t) {
+      return client.bounce.parameter.variable({ variable: 123 }).get()
         .then(function (res) {
           t.equal(res.body, '123')
           t.equal(res.status, 200)
@@ -26,8 +26,8 @@ test('resource chain', function (t) {
   })
 
   t.test('null uri parameter', function (t) {
-    t.test('should output null values as an empty string', function (t) {
-      return client.resources.bounce.parameter.variable(null).get()
+    t.test('output null values as an empty string', function (t) {
+      return client.bounce.parameter.variable(null).get()
         .then(function (res) {
           t.equal(res.body, null)
           t.equal(res.status, 200)
@@ -36,8 +36,8 @@ test('resource chain', function (t) {
   })
 
   t.test('default uri parameter', function (t) {
-    t.test('should use the default value when null', function (t) {
-      return client.resources.defaults.parameter.variable(null).get()
+    t.test('use the default value when null', function (t) {
+      return client.defaults.parameter.variable(null).get()
         .then(function (res) {
           t.equal(res.body, 'default')
           t.equal(res.status, 200)
@@ -54,55 +54,38 @@ test('resource chain', function (t) {
     }
 
     t.test('single parameter', function (t) {
-      t.test('should support arguments', function (t) {
-        return client.resources.parameters.prefix.one(123).get()
-          .then(validateResponse(t))
-      })
-
-      t.test('should not support more arguments than defined', function (t) {
-        return client.resources.parameters.prefix.one(123, 456).get()
-          .then(validateResponse(t))
-      })
+      return client.parameters.prefix.one({ id: 123 }).get()
+        .then(validateResponse(t))
     })
 
     t.test('multiple parameters', function (t) {
-      t.test('should dynamically generate the resource chain', function (t) {
-        return client.resources.parameters.prefix.three(1, 2, 3).get()
-          .then(function (res) {
-            t.equal(res.body, '123')
-            t.equal(res.status, 200)
-          })
-      })
+      return client.parameters.prefix.three({ a: 1, b: 2, c: 3 }).get()
+        .then(function (res) {
+          t.equal(res.body, '123')
+          t.equal(res.status, 200)
+        })
     })
   })
 
   t.test('extensions', function (t) {
     t.test('static extension', function (t) {
-      t.test('should support extensions in the resource chain', function (t) {
-        return client.resources.extensions.static.json.get()
+      t.test('support extensions in the resource chain', function (t) {
+        return client.extensions.static.json.get()
           .then(validateResponse(t))
       })
     })
 
     t.test('media type extension', function (t) {
       t.test('basic', function (t) {
-        t.test('should support mediaTypeExtension parameter', function (t) {
-          return client.resources.extensions.mediaType.basic
-            .mediaTypeExtension('json').get()
+        t.test('support mediaTypeExtension parameter', function (t) {
+          return client.extensions.mediaType.basic({ mediaTypeExtension: '.json' }).get()
             .then(validateResponse(t))
         })
       })
 
       t.test('enum', function (t) {
-        t.test('should have paths from enum values', function (t) {
-          return client.resources.extensions.mediaType.enum.json.get()
-            .then(validateResponse(t))
-        })
-      })
-
-      t.test('enum with period', function (t) {
-        t.test('should have paths from period prefixed enum values', function (t) {
-          return client.resources.extensions.mediaType.enumPeriod.xml.get()
+        t.test('have paths from enum values', function (t) {
+          return client.extensions.mediaType.enum({ mediaTypeExtension: '.json' }).get()
             .then(validateResponse(t))
         })
       })
@@ -111,14 +94,13 @@ test('resource chain', function (t) {
 
   t.test('conflicts', function (t) {
     t.test('media type extension', function (t) {
-      t.test('should handle original route', function (t) {
-        return client.resources.conflicts.mediaType.route.get()
+      t.test('handle original route', function (t) {
+        return client.conflicts.mediaType.route.get()
           .then(validateResponse(t))
       })
 
-      t.test('should handle conflict with media type extension', function (t) {
-        return client.resources.conflicts.mediaType
-          .mediaTypeExtension('json').get()
+      t.test('handle conflict with media type extension', function (t) {
+        return client.conflicts.mediaType({ mediaTypeExtension: '.json' }).get()
           .then(validateResponse(t))
       })
     })

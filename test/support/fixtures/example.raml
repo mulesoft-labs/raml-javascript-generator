@@ -1,8 +1,11 @@
-#%RAML 0.8
+#%RAML 1.0
 ---
 title: Example API
 version: 1.0
 baseUri: http://localhost:{port}
+
+uses:
+  client: !include ../../../node_modules/raml-generator/annotations.raml
 
 documentation:
   - title: About
@@ -74,6 +77,8 @@ resourceTypes:
 /:
   get:
     is: [ success ]
+    (client.methodName): getRoot
+    (client.displayName): Get Root Resource
     description: |
       Make a request against the root resource.
 
@@ -181,11 +186,6 @@ resourceTypes:
     type: methods
   /media-type:
     /enum{mediaTypeExtension}:
-      uriParameters:
-        mediaTypeExtension:
-          enum: [json, xml]
-      type: methods
-    /enum-period{mediaTypeExtension}:
       uriParameters:
         mediaTypeExtension:
           enum: [.json, .xml]
