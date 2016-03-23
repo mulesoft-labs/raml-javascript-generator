@@ -1,6 +1,6 @@
 {
   "name": "raml-javascript-generator",
-  "version": "0.1.2",
+  "version": "1.0.0-0",
   "homepage": "https://github.com/mulesoft-labs/raml-javascript-generator",
   "main": "raml-javascript-generator.js",
   "authors": [
