@@ -23,6 +23,13 @@ test('resource chain', function (t) {
           t.equal(res.status, 200)
         })
     })
+    t.test('dynamically generate the resource chain with primative input', function (t) {
+      return client.bounce.parameter.variable(123).get()
+        .then(function (res) {
+          t.equal(res.body, '123')
+          t.equal(res.status, 200)
+        })
+    })
   })
 
   t.test('null uri parameter', function (t) {

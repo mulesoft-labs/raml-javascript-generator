@@ -158,7 +158,12 @@ function Client (options) {
   }
 
   function toParamsFunction (child: NestedResource, _client: string, _prefix: string) {
-    return `function (uriParams) { return new ${child.id}(${_client}, ${_prefix}template(${stringify(child.relativeUri)}, extend(${stringify(getDefaultParameters(child.uriParameters))}, uriParams))) }`
+    const keys = Object.keys(child.uriParameters);
+    let uriParams = 'uriParams';
+    if (keys.length === 1) {
+      uriParams = `typeof(uriParams) === 'object' ? uriParams : {'${keys[0]}': uriParams}`
+    }
+    return `function (uriParams) { return new ${child.id}(${_client}, ${_prefix}template(${stringify(child.relativeUri)}, extend(${stringify(getDefaultParameters(child.uriParameters))}, ${uriParams}))) }`
   }
 
   // Create prototype resources.
