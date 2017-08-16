@@ -205,9 +205,9 @@ function Client (options) {
       const constructor = `new ${child.id}(${_client}, ${_prefix}${stringify(child.relativeUri)})`
 
       if (withParams[key] == null) {
-        s.line(`  this.${child.methodName} = ${constructor}`)
+        s.line(`  this['${child.methodName}'] = ${constructor}`)
       } else {
-        s.line(`  this.${child.methodName} = setprototypeof(${toParamsFunction(withParams[key], _client, _prefix)}, ${constructor})`)
+        s.line(`  this['${child.methodName}'] = setprototypeof(${toParamsFunction(withParams[key], _client, _prefix)}, ${constructor})`)
       }
     }
   }
