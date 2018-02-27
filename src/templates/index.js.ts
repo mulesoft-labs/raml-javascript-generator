@@ -19,7 +19,12 @@ export default function (api: Api): string {
     s.line(`var ClientOAuth2 = require('client-oauth2')`)
   }
 
-  s.multiline(`var popsicle = require('popsicle')
+ s.multiline(`
+// "ionic build --prod --release" with popsicle caused
+// https://github.com/webpack/webpack/issues/4039 issue in webpack
+// so it was replaced with adapter + angular httpClient
+// exported to window.popsicle 
+//var popsicle = require('popsicle')
 var extend = require('xtend')
 var setprototypeof = require('setprototypeof')
 
