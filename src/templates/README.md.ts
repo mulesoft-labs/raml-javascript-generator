@@ -1,18 +1,19 @@
-import { Api } from 'raml-generator'
-import paramCase = require('param-case')
-import pascalCase = require('pascal-case')
-import camelCase = require('camel-case')
-import { Strands } from 'strands'
+import { Api } from 'raml-generator';
+import paramCase = require('param-case');
+import pascalCase = require('pascal-case');
+import camelCase = require('camel-case');
+import { Strands } from 'strands';
 
-import { hasSecurity, allResources, getSecuritySchemes } from '../support/api'
-import { getUriParametersSnippet } from '../support/resource'
-import { getRequestSnippet, getDisplayName } from '../support/method'
+import { hasSecurity, allResources, getSecuritySchemes } from '../support/api';
+import { getUriParametersSnippet } from '../support/resource';
+import { getRequestSnippet, getDisplayName } from '../support/method';
 
-export default function (api: Api) {
-  const s = new Strands()
-  const projectName = paramCase(api.title)
-  const className = pascalCase(api.title)
+export const readmeTemplate = (api: Api) => {
+  const s = new Strands();
+  const projectName = paramCase(api.title);
+  const className = pascalCase(api.title);
 
+  /* tslint:disable max-line-length ter-max-len */
   s.multiline(`# ${api.title}
 
 > Browser and node module for making API requests against [${api.title}](${api.baseUri}).
@@ -30,7 +31,7 @@ var ${className} = require('${projectName}')
 
 var client = new ${className}()
 \`\`\`
-`)
+`);
 
   if (hasSecurity(api, 'OAuth 2.0')) {
     s.multiline(`### Authentication
@@ -46,15 +47,15 @@ var auth = new ${className}.security.<method>({
   redirectUri:  'http://example.com/auth/callback'
 });
 
-// Available methods for OAuth 2.0:`)
+// Available methods for OAuth 2.0:`);
 
     for (const scheme of getSecuritySchemes(api)) {
       if (scheme.type === 'OAuth 2.0') {
-        s.line(` - ${camelCase(scheme.name)}`)
+        s.line(` - ${camelCase(scheme.name)}`);
       }
     }
 
-    s.line('```')
+    s.line('```');
   }
 
   s.multiline(`### Options
@@ -89,33 +90,34 @@ Exports \`${className}.form\`, which exposes a cross-platform \`FormData\` inter
 ### Methods
 
 All methods return a HTTP request instance of [Popsicle](https://github.com/blakeembrey/popsicle), which allows the use of promises (and streaming in node).
-`)
+`);
 
   for (const resource of allResources(api)) {
     for (const method of resource.methods) {
-      s.line(`#### ${getDisplayName(method, resource)}`)
-      s.line()
+      s.line(`#### ${getDisplayName(method, resource)}`);
+      s.line();
 
       if (Object.keys(resource.uriParameters).length) {
-        s.line(getUriParametersSnippet(resource))
-        s.line()
+        s.line(getUriParametersSnippet(resource));
+        s.line();
       }
 
       if (method.description) {
-        s.multiline(method.description.trim())
-        s.line()
+        s.multiline(method.description.trim());
+        s.line();
       }
 
       s.multiline(`\`\`\`js
 client.${getRequestSnippet(method, resource)}.then(...)
 \`\`\`
-  `)
+  `);
+  /* tslint:enable max-line-length */
     }
   }
 
-  s.line('## License')
-  s.line()
-  s.line('Apache 2.0')
+  s.line('## License');
+  s.line();
+  s.line('Apache 2.0');
 
-  return s.toString()
-}
+  return s.toString();
+};

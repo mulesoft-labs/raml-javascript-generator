@@ -1,3 +1,3 @@
-export default function () {
-  return 'node_modules\n'
-}
+export const gitignoreTemplate = () => {
+  return 'node_modules\n';
+};
