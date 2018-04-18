@@ -1,6 +1,6 @@
 {
   "name": "raml-javascript-generator",
-  "version": "2.2.0",
+  "version": "2.0.0",
   "description": "Generate a JavaScript API client from RAML",
   "main": "raml-javascript-generator.js",
   "config": {
