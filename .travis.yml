@@ -15,11 +15,15 @@ notifications:
   email: false
 
 node_js:
-  - '7'
-  - '6'
+  - "4"
+  - "6"
+  - "8"
+  - "lts/*"
 
 before_script:
   - npm prune
+
+after_script: "npm install coveralls@2 && cat ./coverage/lcov.info | coveralls"
 
 branches:
   except:
