@@ -24,11 +24,22 @@ module.exports = function(config) {
     preprocessors: {
       'test/specs/*test.js': ['browserify']
     },
-    coverageReporter: {
-      type : 'html',
-      dir : 'coverage/'
+    reporters: ['progress', 'istanbul'],
+    istanbulReporter: {
+      dir : 'coverage/',
+      reporters: [
+        // reporters not supporting the `file` property 
+        { type: 'html', subdir: 'report-html' },
+        { type: 'lcov', subdir: 'report-lcov' },
+        // reporters supporting the `file` property, use `subdir` to directly 
+        // output them in the `dir` directory 
+        { type: 'cobertura', subdir: '.', file: 'cobertura.txt' },
+        { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
+        { type: 'teamcity', subdir: '.', file: 'teamcity.txt' },
+        { type: 'text', subdir: '.', file: 'text.txt' },
+        { type: 'text-summary', subdir: '.', file: 'text-summary.txt' },
+      ]
     },
-    reporters: ['progress', 'coverage'],
     autoWatch: false,
     browsers: ['Chrome_headless'],
     singleRun: true,
