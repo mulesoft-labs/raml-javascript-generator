@@ -38,6 +38,7 @@ var output = jsGenerator(/* api, data */)
 
 ## License
 
+
 Apache License 2.0
 
 [npm-image]: https://img.shields.io/npm/v/raml-javascript-generator.svg?style=flat
