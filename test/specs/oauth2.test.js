@@ -2,19 +2,18 @@ const { expect } = require('chai');
 const ExampleApi = require('../.tmp/example'); // eslint-disable-line import/no-unresolved
 
 describe('oauth2', () => {
-  const oauth2 = ExampleApi.Security.oauth2_0({
+  const oauth2 = ExampleApi.Security.oauth_2_0({
     clientId: '123',
     clientSecret: 'abc',
     redirectUri: 'http://example.com/auth/callback'
   });
 
   it('#getUri should return a valid uri', () => {
-    expect(
-      oauth2.code.getUri()).to.equal(
-      'https://localhost:4567/auth/oauth2/authorize?' +
-      'client_id=123&redirect_uri=http%3A%2F%2Fexample.com%2Fauth%2Fcallback&' +
-      'scope=user&response_type=code'
-    );
+    const url = 'https://localhost:4567/auth/oauth2/authorize?' +
+    'client_id=123&redirect_uri=http%3A%2F%2Fexample.com%2Fauth%2Fcallback&' +
+    'scope=user&response_type=code';
+    expect(oauth2.code.getUri())
+      .to.equal(url);
   });
 
   it('user object should sign requests', () => {

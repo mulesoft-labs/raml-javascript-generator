@@ -18,3 +18,5 @@ rules:
   "key-spacing": ["error", "mode": "strict"]
   "max-len": ["error", 150]
   "arrow-parens": ["error", "always"]
+  "prefer-destructuring": "off"
+  "function-paren-newline": "off"
