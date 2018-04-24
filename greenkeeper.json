@@ -2,12 +2,7 @@
   "groups": {
     "default": {
       "packages": [
-<<<<<<< HEAD
         "package.json"
-=======
-        "package.json",
-        "src/templates/package.json.ts"
->>>>>>> d64beb1f586d5968f47c94c37ac97fce1ef37eb8
       ]
     }
   }
