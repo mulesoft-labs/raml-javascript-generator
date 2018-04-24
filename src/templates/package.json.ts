@@ -1,10 +1,10 @@
-import paramCase = require('param-case')
-import { Api } from 'raml-generator'
+import paramCase = require('param-case');
+import { Api } from 'raml-generator';
 
-import { hasSecurity } from '../support/api'
+import { hasSecurity } from '../support/api';
 
-export default function (api: Api) {
-  return JSON.stringify({
+export const packageTemplate = (api: Api) => {
+  const json = {
     name: paramCase(api.title),
     version: '0.0.0',
     description: api.description,
@@ -27,9 +27,13 @@ export default function (api: Api) {
     homepage: 'https://github.com/mulesoft/raml-javascript-generator',
     dependencies: {
       'client-oauth2': hasSecurity(api, 'OAuth 2.0') ? '^2.1.0' : undefined,
-      'xtend': '^4.0.1',
-      'popsicle': '^5.0.0',
-      'setprototypeof': '^1.0.1'
+      xtend: '^4.0.1',
+      'request-promise': '^4.2.2',
+      request: '^2.34',
+      setprototypeof: '^1.0.1',
+      'query-string': '^5.0.0'
     }
-  }, null, 2) + '\n'
-}
+  };
+
+  return JSON.stringify(json, null, 2) + '\n';
+};

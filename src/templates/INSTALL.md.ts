@@ -1,8 +1,8 @@
-import { Api } from 'raml-generator'
-import paramCase = require('param-case')
+import { Api } from 'raml-generator';
+import paramCase = require('param-case');
 
-export default function (api: Api) {
-  const projectName = paramCase(api.title)
+export const installTemplate = (api: Api) => {
+  const projectName = paramCase(api.title);
 
   return `# Installation
 
@@ -42,5 +42,5 @@ npm publish
 # Install from npm
 npm install ${projectName} --save
 \`\`\`
-`
-}
+`;
+};
