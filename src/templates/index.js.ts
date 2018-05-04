@@ -1,216 +1,381 @@
-import { Strands } from 'strands'
-import { Api } from 'raml-generator'
-import pascalCase = require('pascal-case')
-import camelCase = require('camel-case')
-import stringify = require('javascript-stringify')
+import { Strands } from 'strands';
+import { Api } from 'raml-generator';
+import camelCase = require('camel-case');
+import uppercamelcase = require('uppercamelcase');
+import javascriptStringify = require('javascript-stringify');
+import { getDefaultParameters } from '../support/parameters';
 
-import { getDefaultParameters } from '../support/parameters'
-import { hasSecurity, getSecuritySchemes, allResources, nestedResources, NestedMethod, NestedResource } from '../support/api'
-import { isQueryMethod } from '../support/method'
+import {
+  hasSecurity,
+  getSecuritySchemes,
+  allResources,
+  nestedResources,
+  separateChildren,
+  NestedMethod,
+  NestedResource,
+  KeyedNestedResources,
+  SplitedKeyedNestedResources,
+  AllResource
+} from '../support/api';
+import { isQueryMethod } from '../support/method';
 
-export default function (api: Api): string {
-  const s = new Strands()
-  const flatTree = allResources(api) // For short-hand annotations.
-  const nestedTree = nestedResources(api)
-  const { withParams, noParams } = separateChildren(nestedTree)
-  const supportedSecuritySchemes = getSecuritySchemes(api).filter(x => x.type === 'OAuth 2.0')
+export const indexTemplate = (api: Api): string => {
+  const tplGenerator = new ClientTemplateGenerator(api);
+  return tplGenerator.getClient();
+};
 
-  if (hasSecurity(api, 'OAuth 2.0')) {
-    s.line(`var ClientOAuth2 = require('client-oauth2')`)
+class ClientTemplateGenerator {
+  private api: Api;
+  private currentPath: string[];
+  private classes: string[];
+  private buffer: Strands;
+  private flatTree: AllResource[];
+  private nestedTree: NestedResource;
+  private withParams: KeyedNestedResources;
+  private noParams: KeyedNestedResources;
+  private supportedSecuritySchemes: any[];
+
+  constructor(api: Api) {
+    this.classes = [];
+    this.api = api;
+    this.flatTree = allResources(api);
+    this.nestedTree = nestedResources(api);
+    const splitedNestedResources: SplitedKeyedNestedResources = separateChildren(this.nestedTree);
+    this.withParams = splitedNestedResources.withParams;
+    this.noParams = splitedNestedResources.noParams;
+    this.supportedSecuritySchemes = getSecuritySchemes(api).filter(x => x.type === 'OAuth 2.0');
+    this.currentPath = [];
+    this.buffer = new Strands();
   }
 
-  s.multiline(`var popsicle = require('popsicle')
-var extend = require('xtend')
-var setprototypeof = require('setprototypeof')
+  public getClient() {
+    this.generateRequiresAndGlobalFunctions();
+    this.createClientClass();
+    this.createChildren();
+    this.generateStaticMethodsAndExport();
+    return this.buffer.toString();
+  }
 
-var TEMPLATE_REGEXP = /\\{([^\\{\\}]+)\\}/g
+  private generateRequiresAndGlobalFunctions() {
+    this.buffer.line(`/* eslint no-use-before-define: 0 */`);
 
-module.exports = Client
-
-function template (string, interpolate) {
-  return string.replace(TEMPLATE_REGEXP, function (match, key) {
-    if (interpolate[key] != null) {
-      return encodeURIComponent(interpolate[key])
+    if (hasSecurity(this.api, 'OAuth 2.0')) {
+      this.buffer.line(`const ClientOAuth2 = require('client-oauth2');`);
     }
 
-    return ''
-  })
-}
+    this.buffer.multiline(`const rp = require('request-promise');
+const queryString = require('query-string');
 
-function request (client, method, path, opts) {
-  var options = extend({}, client._options, opts)
-  var baseUri = template(options.baseUri, options.baseUriParameters)
+const TEMPLATE_REGEXP = /\{\\+?([^\{\}]+)\}/g;
 
-  var reqOpts = {
-    url: baseUri.replace(/\\/$/, '') + template(path, options.uriParameters),
-    method: method,
-    headers: options.headers,
-    body: options.body,
-    query: options.query,
-    options: options.options
+const template = (string, interpolate) =>
+  string.replace(TEMPLATE_REGEXP, (match, key) => {
+    if (interpolate[key] != null) {
+      return encodeURIComponent(interpolate[key]);
+    }
+
+    return '';
+  });
+
+const request = (client, method, path, opts) => {
+  const headers = opts.headers ?
+    Object.assign({}, client.options.headers, opts.headers) : client.options.headers;
+  const options = Object.assign({}, client.options, opts);
+  const baseUri = template(options.baseUri, options.baseUriParameters);
+
+  if (typeof options.query === 'string') {
+    options.query = queryString.parse(options.query);
   }
+
+  let reqOpts = {
+    url: baseUri.replace(/\\/$/, '') + template(path, options.uriParameters),
+    json: !Buffer.isBuffer(options.body),
+    method,
+    headers,
+    formData: options.formData,
+    body: options.body,
+    qs: options.query,
+    options: options.options,
+    resolveWithFullResponse: true
+  };
 
   if (options.user && typeof options.user.sign === 'function') {
-    reqOpts = options.user.sign(reqOpts)
+    reqOpts = options.user.sign(reqOpts);
   }
 
-  return popsicle.request(reqOpts)
-}
-
-function Client (options) {
-  this._path = ''
-  this._options = extend({
-    baseUri: ${stringify(api.baseUri)},
-    baseUriParameters: ${stringify(getDefaultParameters(api.baseUriParameters)) }
-  }, options)
-
-  function client (method, path, options) {
-    return request(client, method, path, options)
-  }
-`)
-
-  createThisResources(withParams, noParams, 'client', '')
-
-  s.line(`  setprototypeof(client, this)`)
-  s.line(`  return client`)
-  s.line(`}`)
-  s.line()
-  s.line(`Client.form = popsicle.form`)
-  s.line(`Client.version = ${stringify(api.version)}`)
-
-  s.line('Client.Security = {')
-
-  supportedSecuritySchemes.forEach((scheme: any, index: number, schemes: any[]) => {
-    const name = camelCase(scheme.name)
-    const trailing = index < schemes.length ? ',' : ''
-
-    if (scheme.type === 'OAuth 2.0') {
-      s.line(`  ${name}: function (options) { return new ClientOAuth2(extend(${stringify(scheme.settings)}, options)) }${trailing}`)
-    }
-  })
-
-  s.line('}')
-
-  for (const resource of flatTree) {
-    const { relativeUri, uriParameters } = resource
-
-    for (const method of resource.methods) {
-      if (method.annotations && method.annotations['client.methodName']) {
-        const methodName = method.annotations['client.methodName'].structuredValue
-        const type = isQueryMethod(method) ? 'query' : 'body'
-        const headers = getDefaultParameters(method.headers)
-
-        if (Object.keys(uriParameters).length) {
-          s.line(`Client.prototype.${methodName} = function (uriParams, ${type}, opts) {`)
-          s.line(`  var uriParameters = extend(${stringify(getDefaultParameters(uriParameters))}, uriParams)`)
-          s.line(`  var options = extend({ ${type}: ${type}, uriParameters: uriParameters, headers: ${stringify(headers)} }, opts)`)
-          s.line(`  return request(this, ${stringify(method.method)}, ${stringify(relativeUri)}, options)`)
-          s.line(`}`)
-        } else {
-          s.line(`Client.prototype.${methodName} = function (${type}, opts) {`)
-          s.line(`  var options = extend({ ${type}: ${type}, headers: ${stringify(headers)} }, opts)`)
-          s.line(`  return request(this, ${stringify(method.method)}, ${stringify(relativeUri)}, options)`)
-          s.line(`}`)
-        }
-      }
-    }
+  return rp(reqOpts).then((response) => {
+    // adding backward compatibility
+    response.status = response.statusCode;
+    return response;
+  });
+};`);
   }
 
-  createProtoResources(withParams, noParams, 'Client')
-  createProtoMethods(nestedTree.methods, 'Client', 'this', `''`)
-  createChildren(nestedTree.children)
+  private toParamsFunction(child: NestedResource, client: string, isChild: boolean) {
+    const className = `${this.currentPath.join('.')}.${uppercamelcase(child.methodName)}`;
+    const func2Return = new Strands();
+    const path = isChild ? 'this.path + ' : '';
+    func2Return.multiline(`(uriParams) =>
+      new ${className}(
+        ${client},
+        ${path}template(${javascriptStringify(child.relativeUri)},
+          Object.assign(${javascriptStringify(getDefaultParameters(child.uriParameters))}, uriParams)
+        )
+      )`);
+    return func2Return.toString();
+  }
 
-  // Interface for mapped nested resources.
-  interface KeyedNestedResources {
-    [key: string]: NestedResource
+  private toParamsMethod(child: NestedResource, client: string, isChild: boolean) {
+    const className = `${this.currentPath.join('.')}.${uppercamelcase(child.methodName)}`;
+    const func2Return = new Strands();
+    const path = isChild ? 'this.path + ' : '';
+
+    func2Return.multiline(`(uriParams) {
+    return new ${className}(
+      ${client},
+      ${path}template(${javascriptStringify(child.relativeUri)},
+        Object.assign(${this.formatJSON(getDefaultParameters(child.uriParameters), 2, 8)}, uriParams)
+      )
+    );
+  }`);
+    return func2Return.toString();
   }
 
   // Create prototype methods.
-  function createProtoMethods (methods: NestedMethod[], id: string, _client: string, _path: string) {
+  private createProtoMethods(methods: NestedMethod[], client: string, path: string, prefix?: string) {
     for (const method of methods) {
-      const headers = getDefaultParameters(method.headers)
-      const type = isQueryMethod(method) ? 'query' : 'body'
-
-      s.line(`${id}.prototype.${camelCase(method.method)} = function (${type}, opts) {`)
-      s.line(`  var options = extend({ ${type}: ${type}, headers: ${stringify(headers)} }, opts)`)
-      s.line(`  return request(${_client}, ${stringify(method.method)}, ${_path}, options)`)
-      s.line(`}`)
-    }
-  }
-
-  // Split children by "type" of method that needs to be created.
-  function separateChildren (resource: NestedResource) {
-    const withParams: KeyedNestedResources = {}
-    const noParams: KeyedNestedResources = {}
-
-    // Split apart children types.
-    for (const key of Object.keys(resource.children)) {
-      const child = resource.children[key]
-
-      if (Object.keys(child.uriParameters).length) {
-        withParams[child.methodName] = child
+      const headers = getDefaultParameters(method.headers);
+      const type = isQueryMethod(method) ? 'query' : 'body';
+      const headersText = Object.keys(headers).length === 0 ? '' : `,\n    {\n      headers: ${this.formatJSON(headers, 2, 6)}\n    }`;
+      if (prefix) {
+        this.buffer.line(`${prefix}.prototype.${camelCase(method.method)} = function ${camelCase(method.method)}Func(${type}, opts) {`);
+        this.buffer.line(`  const options = Object.assign(${type} && ${type}.formData ? ${type} : {`);
+        this.buffer.line(`    ${type}`);
+        this.buffer.line(`  }${headersText}, opts);`);
+        this.buffer.line(`  return request(${client}, ${javascriptStringify(method.method)}, ${path}, options);`);
+        this.buffer.line(`};`);
       } else {
-        noParams[child.methodName] = child
+        this.buffer.line(`  ${camelCase(method.method)}(${type}, opts) {`);
+        this.buffer.line(`    const options = Object.assign(${type} && ${type}.formData ? ${type} : {`);
+        this.buffer.line(`      ${type}`);
+        this.buffer.line(`    }${headersText}, opts);`);
+        this.buffer.line(`    return request(${client}, ${javascriptStringify(method.method)}, ${path}, options);`);
+        this.buffer.line(`  }`);
       }
     }
-
-    return { withParams, noParams }
-  }
-
-  function toParamsFunction (child: NestedResource, _client: string, _prefix: string) {
-    return `function (uriParams) { return new ${child.id}(${_client}, ${_prefix}template(${stringify(child.relativeUri)}, extend(${stringify(getDefaultParameters(child.uriParameters))}, uriParams))) }`
   }
 
   // Create prototype resources.
-  function createProtoResources (withParams: KeyedNestedResources, noParams: KeyedNestedResources, id: string) {
+  private createProtoResources(withParams: KeyedNestedResources, noParams: KeyedNestedResources) {
     for (const key of Object.keys(withParams)) {
-      const child = withParams[key]
+      const child = withParams[key];
 
       // Skip inlined entries.
       if (noParams[key] != null) {
-        continue
+        continue;
       }
 
-      s.line(`${id}.prototype.${child.methodName} = ${toParamsFunction(child, 'this._client', 'this._path + ')}`)
+      this.buffer.append(`  ${child.methodName}${this.toParamsMethod(child, 'this.client', true)}`);
     }
   }
 
   // Create nested resource instances.
-  function createResource (resource: NestedResource) {
-    const { withParams, noParams } = separateChildren(resource)
+  private createResource(resource: NestedResource) {
+    this.currentPath.push(uppercamelcase(resource.methodName));
+    const { withParams, noParams } = separateChildren(resource);
+    const className = this.currentPath.join('.');
 
-    s.line(`function ${resource.id} (client, path) {`)
-    s.line(`  this._client = client`)
-    s.line(`  this._path = path`)
+    this.buffer.return();
+    // Check if this class is already there
+    if (this.classes.filter(x => x === className).length > 0) {
+      this.createProtoMethods(resource.methods, 'this.client', 'this.path', className);
+    } else {
+      this.classes.push(className);
+      if (className.indexOf('.') > 0) {
+        this.buffer.line(`${className} = class {`);
+      } else {
+        this.buffer.line(`class ${className} {`);
+      }
+      this.buffer.line(`  constructor(client, path) {`);
+      this.buffer.line(`    this.client = client;`);
+      this.buffer.line(`    this.path = path;`);
 
-    createThisResources(withParams, noParams, 'this._client', 'this._path + ')
+      this.createThisResources(withParams, noParams, 'this.client');
+      this.buffer.line(`  }`);
+      this.createProtoResources(withParams, noParams);
+      this.createProtoMethods(resource.methods, 'this.client', 'this.path');
+      if (className.indexOf('.') > 0) {
+        this.buffer.line(`};`);
+      } else {
+        this.buffer.line(`}`);
+      }
+      this.createChildren(resource.children);
+    }
+    this.currentPath.pop();
 
-    s.line(`}`)
-
-    createProtoResources(withParams, noParams, resource.id)
-    createProtoMethods(resource.methods, resource.id, 'this._client', 'this._path')
-    createChildren(resource.children)
   }
 
   // Generate all children.
-  function createChildren (children: KeyedNestedResources) {
-    for (const key of Object.keys(children)) {
-      createResource(children[key])
+  private createChildren(children?: KeyedNestedResources) {
+    const childrenToUse = children || this.nestedTree.children;
+    for (const key of Object.keys(childrenToUse)) {
+      this.createResource(childrenToUse[key]);
     }
   }
 
-  function createThisResources (withParams: KeyedNestedResources, noParams: KeyedNestedResources, _client: string, _prefix: string) {
+  private createThisResources(withParams: KeyedNestedResources, noParams: KeyedNestedResources, client: string, isChild = true) {
     for (const key of Object.keys(noParams)) {
-      const child = noParams[key]
-      const constructor = `new ${child.id}(${_client}, ${_prefix}${stringify(child.relativeUri)})`
+      const child = noParams[key];
+      let constructor;
+      let path: string;
+      if (isChild) {
+        path = `\`\${this.path}${child.relativeUri}\``;
+      } else {
+        path = `'${child.relativeUri}'`;
+      }
+      if (this.currentPath.length === 0) {
+        constructor = `new ${uppercamelcase(child.methodName)}(${client}, ${path})`;
+      } else {
+        constructor = `new ${this.currentPath.join('.')}.` +
+          `${uppercamelcase(child.methodName)}(${client}, ${path})`;
+      }
 
       if (withParams[key] == null) {
-        s.line(`  this.${child.methodName} = ${constructor}`)
+        this.buffer.line(`    this.${child.methodName} = ${constructor};`);
       } else {
-        s.line(`  this.${child.methodName} = setprototypeof(${toParamsFunction(withParams[key], _client, _prefix)}, ${constructor})`)
+        this.buffer.line(`    this.${child.methodName} = Object.setPrototypeOf(` +
+          `${this.toParamsFunction(withParams[key], client, isChild)}      , ${constructor});`);
       }
     }
   }
 
-  return s.toString()
+  private createClientClass() {
+    this.buffer.multiline(`
+class Client {
+  constructor(options) {
+    this.path = '';
+    this.options = Object.assign({
+      baseUri: ${javascriptStringify(this.api.baseUri)},
+      baseUriParameters: ${this.formatJSON(getDefaultParameters(this.api.baseUriParameters), 2, 6).split('\n').join('\n') },
+      headers: {}
+    }, options);
+    this.customRequest = (method, path, opts) =>
+      request(this, method, path, opts);\n
+    this.form = (payload) => {
+      const data = {
+        formData: payload,
+        append(key, value) {
+          if (typeof value !== 'string') {
+            this.formData.file = value;
+          } else {
+            data.formData[key] = value;
+          }
+        }
+      };
+      return data;
+    };\n`);
+
+    this.createThisResources(this.withParams, this.noParams, 'this', false);
+
+    this.buffer.line(`  }\n`);
+    // Adding the extensibility point
+
+    this.buffer.multiline(`  setHeaders(headers) {
+    this.options.headers = headers;`);
+    this.buffer.line(`  }`);
+
+    this.buffer.multiline(`
+  use(name, module) {
+    const moduleType = typeof module;
+    if (Object.prototype.hasOwnProperty.call(this, name)) {
+      throw Error(\`The property \${name} already exists\`);
+    }
+    switch (moduleType) {
+      case 'string':
+        // eslint-disable-next-line
+        this[name] = require(module);
+        break;
+      case 'function':
+        this[name] = new module(); // eslint-disable-line new-cap
+        break;
+      case 'object':
+        this[name] = module;
+        break;
+      case 'undefined':
+        if (typeof name === 'string') {
+          // eslint-disable-next-line
+          this[name] = require(name);
+          break;
+        }
+        throw Error('Cannot create the extension point with the values provided');
+      default:
+        throw Error('Cannot create the extension point with the values provided');
+    }
+  }`);
+    for (const resource of this.flatTree) {
+      const { relativeUri, uriParameters } = resource;
+
+      for (const method of resource.methods) {
+        if (method.annotations && method.annotations['client.methodName']) {
+          const methodName = method.annotations['client.methodName'].structuredValue;
+          const type = isQueryMethod(method) ? 'query' : 'body';
+          const headers = getDefaultParameters(method.headers);
+
+          const headersText = Object.keys(headers).length === 0 ? '' : `, headers: ${javascriptStringify(headers)}`;
+
+          if (Object.keys(uriParameters).length) {
+            this.buffer.return();
+            this.buffer.line(`  ${methodName}(uriParams, ${type}, opts) {`);
+            this.buffer.line(`    const uriParameters = Object.assign(` +
+              `${javascriptStringify(getDefaultParameters(uriParameters))}, uriParams);`);
+            this.buffer.line(`  const options = Object.assign({ ${type}, ` +
+              `uriParameters: uriParameters${headersText} }, opts);`);
+            this.buffer.line(`  return request(this, ${javascriptStringify(method.method)}, ` +
+              `${javascriptStringify(relativeUri)}, options);`);
+            this.buffer.line(`  }`);
+          } else {
+            this.buffer.return();
+            this.buffer.line(`  ${methodName}(${type}, opts) {`);
+            this.buffer.line(`    const options = Object.assign({ ${type}${headersText} }, opts);`);
+            this.buffer.line(`    return request(this, ${javascriptStringify(method.method)}, ` +
+              `${javascriptStringify(relativeUri)}, options);`);
+            this.buffer.line(`  }`);
+          }
+        }
+      }
+    }
+    this.createProtoMethods(this.nestedTree.methods, 'this', `''`);
+    this.createProtoResources(this.withParams, this.noParams);
+    this.buffer.line(`}`);
+  }
+
+  private generateStaticMethodsAndExport() {
+    this.buffer.line(`Client.version = ${javascriptStringify(this.api.version)};`);
+    this.buffer.line('Client.Security = {');
+
+    this.supportedSecuritySchemes.forEach((scheme: any, index: number, schemes: any[]) => {
+      const name = camelCase(scheme.name);
+      const trailing = index < schemes.length - 1 ? ',' : '';
+
+      if (scheme.type === 'OAuth 2.0') {
+        this.buffer.return();
+        this.buffer.line('// eslint-disable-next-line');
+        this.buffer.line(`  ${name}: function ${name}(options) {`);
+        this.buffer.multiline(`    const schemeSettings = ${this.formatJSON(scheme.settings, 2, 4)};`);
+        this.buffer.line(`    return new ClientOAuth2(Object.assign(schemeSettings, options));`);
+        this.buffer.line(`  }${trailing}`);
+      }
+    });
+    this.buffer.line('};');
+    this.buffer.line(`module.exports = Client;`);
+  }
+
+  private formatJSON(object: any, jsonIndent: number, srcIndent: number) {
+    let spaces = '';
+    for (let x = 0; x < srcIndent; x = x + 1) {
+      spaces += ' ';
+    }
+    return javascriptStringify(object, null, jsonIndent).split('\n').join(`\n${spaces}`);
+  }
+
 }

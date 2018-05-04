@@ -1,30 +1,41 @@
 {
   "name": "raml-javascript-generator",
-  "version": "1.0.0-0",
+  "version": "2.0.0",
   "description": "Generate a JavaScript API client from RAML",
   "main": "raml-javascript-generator.js",
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/prompt"
+    }
+  },
   "files": [
     "dist/",
     "LICENSE"
   ],
   "bin": {
-    "raml-javascript-generator": "dist/bin.js"
+    "raml-js-client-generator": "dist/bin.js"
   },
   "scripts": {
-    "lint": "# tslint \"src/**/*.ts\"",
-    "typings": "typings",
+    "commit": "git-cz",
+    "commitmsg": "validate-commit-msg",
+    "lint:ts": "tslint './src/**/*.ts'",
+    "lint:js": "eslint './test/**/*.js'",
+    "lint:generated": "eslint './test/.tmp/example/*.js'",
+    "lint": " npm run lint:ts && npm run lint:js",
     "build": "rm -rf dist/ && tsc",
-    "test-cov": "istanbul cover --print none node_modules/blue-tape/bin/blue-tape.js -- \"test/specs/*.js\" | tap-spec",
-    "prepublish": "typings install && npm run build",
+    "postversion": "git push origin HEAD && git push origin $(git describe --tags) && npm publish",
+    "preversion": "npm run build",
     "generate-client": "node dist/bin.js test/support/fixtures/example.raml -o test/.tmp/example && cd test/.tmp/example && npm install",
-    "test-browser": "browserify -i nock -t envify test/specs/*.js | tape-run --render tap-spec",
+    "test-browser": "karma start",
     "test-server-open": "node test/support/server.js & echo $! > test.pid",
     "test-server-close": "if [ -f test.pid ]; then kill -9 $(cat test.pid); rm test.pid; fi",
-    "test": "npm run lint && npm run build && npm run generate-client && npm run test-server-open && npm run test-cov && npm run test-browser; npm run test-server-close"
+    "test": "npm run lint && npm run build && npm run generate-client && npm run lint:generated && npm run test-server-open && npm run test-browser",
+    "pretest": "npm run test-server-close",
+    "posttest": "npm run test-server-close"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mulesoft-labs/raml-javascript-generator.git"
+    "url": "git://github.com/mulesoft-labs/raml-js-client-generator"
   },
   "keywords": [
     "raml",
@@ -36,31 +47,52 @@
   "author": "MuleSoft, Inc.",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/mulesoft-labs/raml-javascript-generator/issues"
+    "url": "https://github.com/mulesoft-labs/raml-js-client-generator/issues"
   },
-  "homepage": "https://github.com/mulesoft-labs/raml-javascript-generator",
+  "homepage": "https://github.com/mulesoft-labs/raml-js-client-generator",
   "devDependencies": {
-    "blue-tape": "^0.2.0",
+    "@commitlint/cli": "^3.1.2",
+    "@commitlint/config-angular": "^3.1.1",
+    "@commitlint/prompt": "^3.1.2",
     "browserify": "^13.0.0",
+    "browserify-istanbul": "^0.2.1",
+    "chai": "^4.1.1",
+    "commitizen": "^2.9.6",
     "envify": "^3.4.0",
+    "eslint": "^4.5.0",
+    "eslint-config-airbnb-base": "^11.3.2",
+    "eslint-plugin-import": "^2.7.0",
     "express": "^4.12.3",
+    "husky": "^0.14.3",
     "istanbul": "^1.0.0-alpha.2",
+    "karma": "^1.7.0",
+    "karma-browserify": "^5.1.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.1",
+    "karma-istanbul": "0.0.2",
+    "karma-mocha": "^1.3.0",
     "methods": "^1.1.2",
+    "mocha": "^3.5.0",
     "nock": "^7.5.0",
     "sinon": "^1.16.1",
-    "tap-spec": "^4.1.1",
-    "tape-run": "^2.1.0",
-    "typescript": "^1.8.9",
-    "typings": "^0.7.9"
+    "tslint": "^5.7.0",
+    "tslint-config-airbnb": "^5.2.1",
+    "typescript": "^2.4.2",
+    "validate-commit-msg": "^2.14.0",
+    "watchify": "^3.9.0"
   },
   "dependencies": {
+    "@types/node": "^8.0.25",
+    "@types/uppercamelcase": "^3.0.0",
+    "@types/xtend": "^4.0.2",
     "camel-case": "^1.2.2",
     "javascript-stringify": "^1.0.2",
     "param-case": "^1.1.2",
     "pascal-case": "^1.1.2",
-    "raml-generator": "^1.0.0-3",
+    "raml-generator": "2.0.0",
     "strands": "^1.0.1",
     "uniqueid": "^1.0.0",
+    "uppercamelcase": "^3.0.0",
     "xtend": "^4.0.1"
   }
 }

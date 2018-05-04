@@ -1,0 +1,20 @@
+env:
+  es6: true
+  node: true
+  mocha: true
+extends:
+  - eslint:recommended
+  - airbnb-base
+  - plugin:import/errors
+  - plugin:import/warnings
+rules:
+  "indent": ["error", 2, "SwitchCase": 1]
+  "quotes": ["error", "single"]
+  "quote-props": ["error", "consistent-as-needed"]
+  "semi": ["error", "always"]
+  "no-trailing-spaces": ["error", "skipBlankLines": true]
+  "no-multiple-empty-lines": ["error", "max": 1]
+  "comma-dangle": ["error", "never"]
+  "key-spacing": ["error", "mode": "strict"]
+  "max-len": ["error", 150]
+  "arrow-parens": ["error", "always"]

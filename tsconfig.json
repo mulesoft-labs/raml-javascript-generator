@@ -1,17 +1,19 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
+    "sourceMap": true,
     "outDir": "dist/",
     "module": "commonjs",
     "declaration": true,
     "noImplicitAny": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
     "removeComments": true,
-    "sourceMap": true,
     "newLine": "LF"
   },
   "files": [
+    "index.d.ts",
     "src/index.ts",
-    "src/bin.ts",
-    "typings/main.d.ts"
+    "src/bin.ts"
   ]
 }
