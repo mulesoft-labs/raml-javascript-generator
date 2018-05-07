@@ -1,8 +1,8 @@
 {
   "name": "raml-javascript-generator",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Generate a JavaScript API client from RAML",
-  "main": "raml-javascript-generator.js",
+  "main": "dist/index.js",
   "config": {
     "commitizen": {
       "path": "@commitlint/prompt"
@@ -13,7 +13,7 @@
     "LICENSE"
   ],
   "bin": {
-    "raml-js-client-generator": "dist/bin.js"
+    "raml-javascript-generator": "dist/bin.js"
   },
   "scripts": {
     "commit": "git-cz",
@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mulesoft-labs/raml-js-client-generator"
+    "url": "git://github.com/mulesoft-labs/raml-javascript-generator"
   },
   "keywords": [
     "raml",
@@ -47,9 +47,9 @@
   "author": "MuleSoft, Inc.",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/mulesoft-labs/raml-js-client-generator/issues"
+    "url": "https://github.com/mulesoft-labs/raml-javascript-generator/issues"
   },
-  "homepage": "https://github.com/mulesoft-labs/raml-js-client-generator",
+  "homepage": "https://github.com/mulesoft-labs/raml-javascript-generator",
   "devDependencies": {
     "@commitlint/cli": "^3.1.2",
     "@commitlint/config-angular": "^3.1.1",
