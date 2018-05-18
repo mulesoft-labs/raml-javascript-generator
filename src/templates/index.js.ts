@@ -65,6 +65,7 @@ class ClientTemplateGenerator {
 
     this.buffer.multiline(`const rp = require('request-promise');
 const queryString = require('query-string');
+const fs = require('fs');
 
 const TEMPLATE_REGEXP = /\{\\+?([^\{\}]+)\}/g;
 
@@ -76,6 +77,12 @@ const template = (string, interpolate) =>
 
     return '';
   });
+
+const failSafePromisifiedAppendFile = (path, data, options) =>
+  new Promise((resolve) =>
+    fs.appendFile(path, data, options, () => {
+      resolve();
+    }));
 
 const request = (client, method, path, opts) => {
   const headers = opts.headers ?
@@ -103,11 +110,18 @@ const request = (client, method, path, opts) => {
     reqOpts = options.user.sign(reqOpts);
   }
 
-  return rp(reqOpts).then((response) => {
-    // adding backward compatibility
-    response.status = response.statusCode;
-    return response;
-  });
+  let logRequestPromise = Promise.resolve();
+  if (options.logRequestsPath) {
+    logRequestPromise = failSafePromisifiedAppendFile(options.logRequestsPath, JSON.stringify(reqOpts, null, 2), 'utf8');
+  }
+
+  return logRequestPromise
+    .then(() => rp(reqOpts))
+    .then((response) => {
+      // adding backward compatibility
+      response.status = response.statusCode;
+      return response;
+    });
 };`);
   }
 
