@@ -65,7 +65,7 @@ class ClientTemplateGenerator {
 
     this.buffer.multiline(`const rp = require('request-promise');
 const queryString = require('query-string');
-const debuglog = require('util').debuglog('raml-javascript-generator');
+const debuglog = require('util').debuglog('${this.api.title}');
 
 const TEMPLATE_REGEXP = /\{\\+?([^\{\}]+)\}/g;
 
@@ -107,6 +107,12 @@ const request = (client, method, path, opts) => {
   debuglog(reqOpts);
 
   return rp(reqOpts).then((response) => {
+    debuglog({
+      headers: response.headers,
+      body: response.body,
+      statusCode: response.statusCode
+    });
+
     // adding backward compatibility
     response.status = response.statusCode;
     return response;
