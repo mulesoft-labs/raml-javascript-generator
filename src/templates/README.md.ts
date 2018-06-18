@@ -31,6 +31,10 @@ var ${className} = require('${projectName}')
 
 var client = new ${className}()
 \`\`\`
+
+### Logging
+
+This client supports logging by using the environment variable \`NODE_DEBUG=${api.title}\`
 `);
 
   if (hasSecurity(api, 'OAuth 2.0')) {
