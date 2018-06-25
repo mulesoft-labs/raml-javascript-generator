@@ -104,19 +104,27 @@ const request = (client, method, path, opts) => {
     reqOpts = options.user.sign(reqOpts);
   }
 
-  debuglog(reqOpts);
+  debuglog(\`[REQUEST]: \${JSON.stringify(reqOpts, null, 2)}\`);
 
-  return rp(reqOpts).then((response) => {
-    debuglog({
-      headers: response.headers,
-      body: response.body,
-      statusCode: response.statusCode
+  return rp(reqOpts)
+    .then((response) => {
+      const responseLog = {
+        headers: response.headers,
+        body: response.body,
+        statusCode: response.statusCode
+      };
+      debuglog(\`[RESPONSE]: \${JSON.stringify(responseLog, null, 2)}\`);
+
+      // adding backward compatibility
+      response.status = response.statusCode;
+      return response;
+    })
+    .catch((error) => {
+      debuglog(\`[RESPONSE]: \${JSON.stringify(error, null, 2)}\`);
+
+      // rethrow the error so that the returned promise is rejected
+      throw error;
     });
-
-    // adding backward compatibility
-    response.status = response.statusCode;
-    return response;
-  });
 };`);
   }
 

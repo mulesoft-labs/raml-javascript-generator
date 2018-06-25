@@ -37,6 +37,12 @@ var jsGenerator = require('raml-javascript-generator')
 var output = jsGenerator(/* api, data */)
 ```
 
+## Generated Client Logging
+
+Generated clients support logging of requests performed. To activate the logging set the `NODE_DEBUG` environment variable to the name of the generated client.
+
+The data for the request performed and the response received will be displayed in the output.
+
 ## License
 
 
