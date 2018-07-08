@@ -20,8 +20,8 @@ describe('request body', () => {
     describe('json', () => {
       it('should default to json', () => client.bounce.body.post(REQUEST_BODY).then(validateResponse()));
 
-      it('should stringify as json when specified', () =>
-        client.bounce.body.post(REQUEST_BODY, {
+      it('should stringify as json when specified',
+        () => client.bounce.body.post(REQUEST_BODY, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -30,24 +30,24 @@ describe('request body', () => {
 
     describe('primitives', () => {
       describe('strings', () => {
-        it('should send the body as set', () =>
-          client.bounce.body.post('test').then((response) => {
+        it('should send the body as set',
+          () => client.bounce.body.post('test').then((response) => {
             expect(response.body).to.equal('test');
             expect(response.status).to.equal(200);
           }));
       });
 
       describe('numbers', () => {
-        it('should send the body as a string', () =>
-          client.bounce.body.post(10).then((response) => {
+        it('should send the body as a string',
+          () => client.bounce.body.post(10).then((response) => {
             expect(response.body).to.equal(10);
             expect(response.status).to.equal(200);
           }));
       });
 
       describe('null', () => {
-        it('should not send a body', () =>
-          client.bounce.body.post(null).then((response) => {
+        it('should not send a body',
+          () => client.bounce.body.post(null).then((response) => {
             expect(response.body).to.equal(null);
             expect(response.status).to.equal(200);
           }));

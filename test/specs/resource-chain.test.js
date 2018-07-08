@@ -14,8 +14,8 @@ describe('resource chain', () => {
   it('root resource work', () => client.get().then(validateResponse()));
 
   describe('uri parameter', () => {
-    it('dynamically generate the resource chain', () =>
-      client.bounce.parameter.variable({ variable: 123 }).get()
+    it('dynamically generate the resource chain',
+      () => client.bounce.parameter.variable({ variable: 123 }).get()
         .then((res) => {
           expect(res.body).to.equal(123);
           expect(res.status).to.equal(200);
@@ -23,8 +23,8 @@ describe('resource chain', () => {
   });
 
   describe('default uri parameter', () => {
-    it('use the default value when null', () =>
-      client.defaults.parameter.variable(null).get()
+    it('use the default value when null',
+      () => client.defaults.parameter.variable(null).get()
         .then((res) => {
           expect(res.body).to.equal('default');
           expect(res.status).to.equal(200);
@@ -42,8 +42,8 @@ describe('resource chain', () => {
     it('single parameter', () => client.parameters.prefix.one({ id: 123 }).get()
       .then(verifyResponse()));
 
-    it('multiple parameters', () =>
-      client.parameters.prefix.three({ a: 1, b: 2, c: 3 }).get()
+    it('multiple parameters',
+      () => client.parameters.prefix.three({ a: 1, b: 2, c: 3 }).get()
         .then((res) => {
           expect(res.body).to.equal(123);
           expect(res.status).to.equal(200);
@@ -52,21 +52,21 @@ describe('resource chain', () => {
 
   describe('extensions', () => {
     describe('static extension', () => {
-      it('support extensions in the resource chain', () =>
-        client.extensions.static.json.get()
+      it('support extensions in the resource chain',
+        () => client.extensions.static.json.get()
           .then(validateResponse()));
     });
 
     describe('media type extension', () => {
       describe('basic', () => {
-        it('support mediaTypeExtension parameter', () =>
-          client.extensions.mediaType.basic({ mediaTypeExtension: '.json' }).get()
+        it('support mediaTypeExtension parameter',
+          () => client.extensions.mediaType.basic({ mediaTypeExtension: '.json' }).get()
             .then(validateResponse()));
       });
 
       describe('enum', () => {
-        it('have paths from enum values', () =>
-          client.extensions.mediaType.enum({ mediaTypeExtension: '.json' }).get().then(validateResponse()));
+        it('have paths from enum values',
+          () => client.extensions.mediaType.enum({ mediaTypeExtension: '.json' }).get().then(validateResponse()));
       });
     });
   });
@@ -75,8 +75,8 @@ describe('resource chain', () => {
     describe('media type extension', () => {
       it('handle original route', () => client.conflicts.mediaType.route.get().then(validateResponse()));
 
-      it('handle conflict with media type extension', () =>
-        client.conflicts.mediaType({ mediaTypeExtension: '.json' }).get().then(validateResponse()));
+      it('handle conflict with media type extension',
+        () => client.conflicts.mediaType({ mediaTypeExtension: '.json' }).get().then(validateResponse()));
     });
   });
 });

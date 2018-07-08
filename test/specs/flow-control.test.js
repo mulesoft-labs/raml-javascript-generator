@@ -13,8 +13,8 @@ describe('flow control', () => {
 
   it('promise methods', () => {
     METHODS.forEach((method) => {
-      it(`#${method}#then should resolve`, () =>
-        client.hello[method]()
+      it(`#${method}#then should resolve`,
+        () => client.hello[method]()
           .then((response) => {
             expect(response.body).to.equal('Hello World!');
             expect(response.status).to.equal(200);

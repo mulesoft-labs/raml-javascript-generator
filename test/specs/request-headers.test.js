@@ -16,16 +16,16 @@ describe('request headers', () => {
 
   describe('default headers', () => {
     describe('use defaults', () => {
-      it('should use default headers from definition', () =>
-        client.defaults.headers.get().then((response) => {
+      it('should use default headers from definition',
+        () => client.defaults.headers.get().then((response) => {
           expect(response.status).to.equal(200);
           expect(response.body['x-default-header']).to.equal('Hello World!');
         }));
     });
 
     describe('override defaults', () => {
-      it('should override default headers', () =>
-        client.defaults.headers.get(null, {
+      it('should override default headers',
+        () => client.defaults.headers.get(null, {
           headers: { 'x-default-header': 'Overridden' }
         }).then((response) => {
           expect(response.status).to.equal(200);
