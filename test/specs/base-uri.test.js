@@ -45,9 +45,8 @@ describe('base uri', () => {
       baseUri: 'http://google.com/search/'
     });
 
-    it('should be able to manually set the base uri', () =>
-      client.hello.get()
-        .then(validateResponse()));
+    it('should be able to manually set the base uri',
+      () => client.hello.get().then(validateResponse()));
   });
 
   it('base uri parameters', () => {
@@ -58,9 +57,8 @@ describe('base uri', () => {
       }
     });
 
-    it('should be able to manually set the base uri', () =>
-      client.hello.get()
-        .then(validateResponse()));
+    it('should be able to manually set the base uri',
+      () => client.hello.get().then(validateResponse()));
   });
 
   if (process.browser) {

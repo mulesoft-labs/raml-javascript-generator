@@ -69,18 +69,18 @@ const debuglog = require('util').debuglog('${this.api.title}');
 
 const TEMPLATE_REGEXP = /\{\\+?([^\{\}]+)\}/g;
 
-const template = (string, interpolate) =>
-  string.replace(TEMPLATE_REGEXP, (match, key) => {
-    if (interpolate[key] != null) {
-      return encodeURIComponent(interpolate[key]);
-    }
+const template = (string, interpolate) => string.replace(TEMPLATE_REGEXP, (match, key) => {
+  if (interpolate[key] != null) {
+    return encodeURIComponent(interpolate[key]);
+  }
 
-    return '';
-  });
+  return '';
+});
 
 const request = (client, method, path, opts) => {
-  const headers = opts.headers ?
-    Object.assign({}, client.options.headers, opts.headers) : client.options.headers;
+  const headers = opts.headers ? Object.assign(
+    {}, client.options.headers, opts.headers
+  ) : client.options.headers;
   const options = Object.assign({}, client.options, opts);
   const baseUri = template(options.baseUri, options.baseUriParameters);
 
@@ -128,17 +128,15 @@ const request = (client, method, path, opts) => {
 };`);
   }
 
-  private toParamsFunction(child: NestedResource, client: string, isChild: boolean) {
+  private toParamsFunction(child: NestedResource, client: string, isChild: boolean, attach?: string) {
     const className = `${this.currentPath.join('.')}.${uppercamelcase(child.methodName)}`;
     const func2Return = new Strands();
     const path = isChild ? 'this.path + ' : '';
-    func2Return.multiline(`(uriParams) =>
-      new ${className}(
-        ${client},
-        ${path}template(${javascriptStringify(child.relativeUri)},
-          Object.assign(${javascriptStringify(getDefaultParameters(child.uriParameters))}, uriParams)
-        )
-      )`);
+    func2Return.multiline(`(uriParams) => new ${className}(
+      ${client},
+      ${path}template(${javascriptStringify(child.relativeUri)},
+        Object.assign(${javascriptStringify(getDefaultParameters(child.uriParameters))}, uriParams))
+    ),${attach}`);
     return func2Return.toString();
   }
 
@@ -151,8 +149,7 @@ const request = (client, method, path, opts) => {
     return new ${className}(
       ${client},
       ${path}template(${javascriptStringify(child.relativeUri)},
-        Object.assign(${this.formatJSON(getDefaultParameters(child.uriParameters), 2, 8)}, uriParams)
-      )
+        Object.assign(${this.formatJSON(getDefaultParameters(child.uriParameters), 2, 8)}, uriParams))
     );
   }`);
     return func2Return.toString();
@@ -164,6 +161,7 @@ const request = (client, method, path, opts) => {
       const headers = getDefaultParameters(method.headers);
       const type = isQueryMethod(method) ? 'query' : 'body';
       const headersText = Object.keys(headers).length === 0 ? '' : `,\n    {\n      headers: ${this.formatJSON(headers, 2, 6)}\n    }`;
+
       if (prefix) {
         this.buffer.line(`${prefix}.prototype.${camelCase(method.method)} = function ${camelCase(method.method)}Func(${type}, opts) {`);
         this.buffer.line(`  const options = Object.assign(${type} && ${type}.formData ? ${type} : {`);
@@ -172,6 +170,7 @@ const request = (client, method, path, opts) => {
         this.buffer.line(`  return request(${client}, ${javascriptStringify(method.method)}, ${path}, options);`);
         this.buffer.line(`};`);
       } else {
+        this.buffer.line();
         this.buffer.line(`  ${camelCase(method.method)}(${type}, opts) {`);
         this.buffer.line(`    const options = Object.assign(${type} && ${type}.formData ? ${type} : {`);
         this.buffer.line(`      ${type}`);
@@ -192,6 +191,7 @@ const request = (client, method, path, opts) => {
         continue;
       }
 
+      this.buffer.append(`\n`);
       this.buffer.append(`  ${child.methodName}${this.toParamsMethod(child, 'this.client', true)}`);
     }
   }
@@ -260,8 +260,9 @@ const request = (client, method, path, opts) => {
       if (withParams[key] == null) {
         this.buffer.line(`    this.${child.methodName} = ${constructor};`);
       } else {
-        this.buffer.line(`    this.${child.methodName} = Object.setPrototypeOf(` +
-          `${this.toParamsFunction(withParams[key], client, isChild)}      , ${constructor});`);
+        this.buffer.line();
+        this.buffer.append(`    this.${child.methodName} = Object.setPrototypeOf(` +
+          `${this.toParamsFunction(withParams[key], client, isChild, ` ${constructor});`)}`);
       }
     }
   }
@@ -276,8 +277,9 @@ class Client {
       baseUriParameters: ${this.formatJSON(getDefaultParameters(this.api.baseUriParameters), 2, 6).split('\n').join('\n') },
       headers: {}
     }, options);
-    this.customRequest = (method, path, opts) =>
-      request(this, method, path, opts);\n
+    this.customRequest = (method, path, opts) => request(
+      this, method, path, opts
+    );\n
     this.form = (payload) => {
       const data = {
         formData: payload,

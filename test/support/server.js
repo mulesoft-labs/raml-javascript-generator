@@ -1,6 +1,6 @@
 const fs = require('fs');
 const qs = require('querystring');
-const join = require('path').join;
+const { join } = require('path');
 const express = require('express');
 
 module.exports = express();

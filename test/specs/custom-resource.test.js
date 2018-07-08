@@ -10,8 +10,8 @@ describe('custom resource', () => {
       return;
     }
 
-    it(`method ${verb} should work`, () =>
-      client.customRequest(verb, '/status/{id}', { uriParameters: { id: 200 } })
+    it(`method ${verb} should work`,
+      () => client.customRequest(verb, '/status/{id}', { uriParameters: { id: 200 } })
         .then((response) => {
           expect(response.body).to.equal('Success');
           expect(response.status).to.equal(200);
