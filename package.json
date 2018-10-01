@@ -57,7 +57,7 @@
     "browserify": "^16.2.2",
     "browserify-istanbul": "^3.0.1",
     "chai": "^4.1.1",
-    "commitizen": "^2.9.6",
+    "commitizen": "^3.0.0",
     "envify": "^4.1.0",
     "eslint": "^5.0.1",
     "eslint-config-airbnb-base": "^13.0.0",
