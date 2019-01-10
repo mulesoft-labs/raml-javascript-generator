@@ -100,6 +100,10 @@ const request = (client, method, path, opts) => {
     resolveWithFullResponse: true
   };
 
+  if (options.options !== undefined) {
+    reqOpts = Object.assign(reqOpts, options.options);
+  }
+
   if (options.user && typeof options.user.sign === 'function') {
     reqOpts = options.user.sign(reqOpts);
   }
