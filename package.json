@@ -82,7 +82,7 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
-    "@types/node": "^10.5.1",
+    "@types/node": "^11.9.0",
     "@types/uppercamelcase": "^3.0.0",
     "@types/xtend": "^4.0.2",
     "camel-case": "^3.0.0",
