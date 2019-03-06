@@ -86,7 +86,7 @@
     "@types/uppercamelcase": "^3.0.0",
     "@types/xtend": "^4.0.2",
     "camel-case": "^3.0.0",
-    "javascript-stringify": "^1.0.2",
+    "javascript-stringify": "^2.0.0",
     "param-case": "^2.1.1",
     "pascal-case": "^2.0.1",
     "raml-generator": "2.0.1",
