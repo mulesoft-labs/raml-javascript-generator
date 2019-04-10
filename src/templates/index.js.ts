@@ -145,7 +145,7 @@ const request = (client, method, path, opts) => {
   }
 
   private toParamsMethod(child: NestedResource, client: string, isChild: boolean) {
-    const className = `${this.currentPath.join('.')}.${uppercamelcase(child.methodName)}`;
+    const className = this.currentPath.concat([uppercamelcase(child.methodName)]).join('.');
     const func2Return = new Strands();
     const path = isChild ? 'this.path + ' : '';
 
