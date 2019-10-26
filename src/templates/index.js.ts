@@ -196,7 +196,7 @@ const request = (client, method, path, opts) => {
       }
 
       this.buffer.append(`\n`);
-      this.buffer.append(`  ${child.methodName}${this.toParamsMethod(child, 'this.client', true)}`);
+      this.buffer.append(`  ${child.methodName}${this.toParamsMethod(child, 'this', true)}`);
     }
   }
 
