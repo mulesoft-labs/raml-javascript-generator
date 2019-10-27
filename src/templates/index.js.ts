@@ -382,7 +382,7 @@ class Client {
 
       if (scheme.type === 'OAuth 2.0') {
         this.buffer.return();
-        this.buffer.line('// eslint-disable-next-line');
+        this.buffer.line('  // eslint-disable-next-line');
         this.buffer.line(`  ${name}: function ${name}(options) {`);
         this.buffer.multiline(`    const schemeSettings = ${this.formatJSON(scheme.settings, 2, 4)};`);
         this.buffer.line(`    return new ClientOAuth2(Object.assign(schemeSettings, options));`);
