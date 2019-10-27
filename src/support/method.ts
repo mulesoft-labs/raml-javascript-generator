@@ -25,8 +25,7 @@ export function getRequestSnippet(method: any, resource: any) {
   }
 
   const parts = resource.relativeUri.split(/(?=[\/\.])/g);
-
-  return parts.map((part: string) => {
+  const requestMethod = parts.map((part: string) => {
     const methodName = toMethodName(part);
     const uriParams = Object.keys(getUsedUriParameters(part, resource.uriParameters));
 
@@ -35,7 +34,9 @@ export function getRequestSnippet(method: any, resource: any) {
     }
 
     return `${methodName}`;
-  }).join('.') + `.${camelCase(method.method)}([${type}, [options]])`;
+  }).join('.');
+
+  return `${requestMethod}.${camelCase(method.method)}([${type}, [options]])`;
 }
 
 /**
