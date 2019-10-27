@@ -186,7 +186,7 @@ const request = (client, method, path, opts) => {
   }
 
   // Create prototype resources.
-  private createProtoResources(withParams: KeyedNestedResources, noParams: KeyedNestedResources) {
+  private createProtoResources(withParams: KeyedNestedResources, client: string, noParams: KeyedNestedResources) {
     for (const key of Object.keys(withParams)) {
       const child = withParams[key];
 
@@ -196,7 +196,7 @@ const request = (client, method, path, opts) => {
       }
 
       this.buffer.append(`\n`);
-      this.buffer.append(`  ${child.methodName}${this.toParamsMethod(child, 'this', true)}`);
+      this.buffer.append(`  ${child.methodName}${this.toParamsMethod(child, client, true)}`);
     }
   }
 
@@ -223,7 +223,7 @@ const request = (client, method, path, opts) => {
 
       this.createThisResources(withParams, noParams, 'this.client');
       this.buffer.line(`  }`);
-      this.createProtoResources(withParams, noParams);
+      this.createProtoResources(withParams, 'this.client', noParams);
       this.createProtoMethods(resource.methods, 'this.client', 'this.path');
       if (className.indexOf('.') > 0) {
         this.buffer.line(`};`);
@@ -368,7 +368,7 @@ class Client {
       }
     }
     this.createProtoMethods(this.nestedTree.methods, 'this', `''`);
-    this.createProtoResources(this.withParams, this.noParams);
+    this.createProtoResources(this.withParams, 'this', this.noParams);
     this.buffer.line(`}`);
   }
 
