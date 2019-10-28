@@ -35,5 +35,5 @@ export const packageTemplate = (api: Api) => {
     }
   };
 
-  return JSON.stringify(json, null, 2) + '\n';
+  return `${JSON.stringify(json, null, 2)}\n`;
 };
